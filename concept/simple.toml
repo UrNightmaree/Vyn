@@ -1,0 +1,25 @@
+# General settings
+#
+# Will shown in .vim file
+# ```vimscript
+# " Vim syntax file
+# " blah: ...
+# ```
+
+[general]
+Language = "Simple"
+Author = "UrNightmaree"
+Version = "0.1-1" # follows semver
+
+# Syntax settings
+#
+# For filetype name, filetype detection and syntax name
+[syntax]
+name = "simple"
+filetype = ["simple", "*.spl"] # [ filetype name, filetype regex ]
+
+# Syntax rules
+#
+# This is where the fun begin
+[[rules]]
+keyword = ["MY", "HIS", "HER"] # [ keywords... ]

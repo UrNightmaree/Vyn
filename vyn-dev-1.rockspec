@@ -10,7 +10,7 @@ source = {
 }
 description = {
    homepage = "https://github.com/UrNightmaree/Vyn",
-   license = "*** please specify a license ***"
+   license = "MIT"
 }
 build = {
    type = "builtin",
