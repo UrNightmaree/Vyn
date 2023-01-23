@@ -5,13 +5,22 @@
 
 package = "vyn"
 version = "dev-1"
+
 source = {
    url = "git+https://github.com/UrNightmaree/Vyn.git"
 }
+
 description = {
    homepage = "https://github.com/UrNightmaree/Vyn",
    license = "MIT"
 }
+
+dependencies = {
+    "argparse >= 0.7.1-1",
+    "ansicolorsx >= 1.2.3-2",
+    "toml >= 0.1.1-1",
+}
+
 build = {
    type = "builtin",
    modules = {}
