@@ -19,6 +19,7 @@ dependencies = {
     "argparse >= 0.7.1-1",
     "ansicolorsx >= 1.2.3-2",
     "toml >= 0.1.1-1",
+    "lpeg >= 1.0.2-1",
 }
 
 build = {
