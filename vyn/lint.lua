@@ -1,6 +1,5 @@
 local vyn_lint = {}
 
-
 local function table_type(tbl)
     local n_num, n_str = 0, 0
     for i,_ in pairs(tbl) do
@@ -29,14 +28,14 @@ function vyn_lint.check_type(val, ...)
     return valid_type
 end
 
-local function split_prop(str)
+local function parse_prop(str)
     local buff = {}
     for s in str:gmatch "([^.]+)" do
         table.insert(buff,
             s:match "^%d+$" and '['..s..']' or
             s:match "[a-zA-Z0-9_]+" and '.'..s or "['"..s.."']")
     end
-    return buff
+    return table.concat(buff)
 end
 
 ---@param tbl table
@@ -44,34 +43,29 @@ end
 ---@param ... string
 ---@return boolean
 function vyn_lint.check_prop_type(tbl, prop, ...)
-    local t_prop = split_prop(prop)
+    local str_prop = parse_prop(prop)
 
     ---@diagnostic disable-next-line: deprecated
     local res = (load or loadstring)([=[
         return (_VERSION == 5.1 and arg or {...})[1]]=]
-        ..table.concat(t_prop))(tbl)
+        ..str_prop)(tbl)
 
     return vyn_lint.check_type(res, ...)
 end
 
 local function strict_check_prop_type(tbl, prop, ...)
     if not vyn_lint.check_prop_type(tbl, prop, ...) then
-        error("property `table"..table.concat(split_prop(prop))..
-            "` does not match any types of <"..table.concat({...}, ", ")..">!")
+        error("Property `/`toml_src"..parse_prop(prop)..
+            "`/ does not match any types of <"..table.concat({...}, ", ")..">!")
     end
 end
 
-function vyn_lint.validate_toml(toml_str)
-    local toml = require "toml"
-
-    local ok, tbl = pcall(toml.decode, toml_str)
-    if not ok then
-        local msg = "from line:"..tbl.begin.line.." column:"..tbl.begin.column.." to line:"..tbl["end"].line.." column:"..tbl["end"].column..", "..tbl.reason
-        return ok, msg
-    end
-
-    local err
-    ok, err = pcall(function()
+---@param tbl table
+---@param color? boolean
+---@return boolean
+---@return string?
+function vyn_lint.validate_toml(tbl, color)
+    local ok, err = pcall(function()
         strict_check_prop_type(tbl, "syntax", "object")
         strict_check_prop_type(tbl, "syntax.name", "string")
         strict_check_prop_type(tbl, "syntax.filetype", "array")
@@ -83,9 +77,15 @@ function vyn_lint.validate_toml(toml_str)
         end
     end)
 
-    if not ok then
+    if not ok and err then
         local curr_source = debug.getinfo(1,'S').source:gsub("^@",""):gsub("%p","%%%1")
-        err = err:gsub("^"..curr_source..":%d-:%s*", "") ---@diagnostic disable-line: need-check-nil 
+        err = err:gsub("^"..curr_source..":%d-:%s*", "")
+
+        if not color then
+            err = err
+                :gsub("(.|(.-)|)","%2")
+                :gsub("(./(.-)/)", "%2")
+        end
         return false, err
     else return true end
 end
